@@ -3,12 +3,12 @@ import '../../services/auth_service.dart';
 import '../../screens/mobile/login_mobile.dart';
 
 class VerifyOtpMobile extends StatefulWidget {
-  final String email;
+ final String login;
 
-  const VerifyOtpMobile({
-    super.key,
-    required this.email,
-  });
+const VerifyOtpMobile({
+  super.key,
+  required this.login,
+});
 
   @override
   State<VerifyOtpMobile> createState() =>
@@ -37,7 +37,7 @@ class _VerifyOtpMobileState
 
     try {
       final result = await AuthService.verifyOtp(
-        email: widget.email,
+          login: widget.login,
         otp: otpController.text.trim(),
       );
 
@@ -123,7 +123,7 @@ class _VerifyOtpMobileState
               const SizedBox(height: 10),
 
               Text(
-                widget.email,
+                widget.login,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white70,

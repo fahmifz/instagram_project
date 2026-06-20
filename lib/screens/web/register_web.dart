@@ -548,8 +548,8 @@ final TextEditingController passwordController =
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => VerifyOtpWeb(
-                                    email: loginController.text,
-                                  ),
+                                  login: loginController.text,
+                                ),
                                 ),
                               );
                             } else {

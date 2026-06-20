@@ -12,7 +12,7 @@ class RegisterMobile extends StatefulWidget {
 
 class _RegisterMobileState extends State<RegisterMobile> {
 
-  final TextEditingController emailController =
+  final TextEditingController loginController =
     TextEditingController();
 
   @override
@@ -83,15 +83,15 @@ class _RegisterMobileState extends State<RegisterMobile> {
 
                 // PHONE
                 TextField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
+                  controller: loginController,
+                  keyboardType: TextInputType.text,
 
                   style: const TextStyle(
                     color: Colors.white,
                   ),
 
                   decoration: InputDecoration(
-                    labelText: "Email",
+                    labelText: "Nomor HP atau Email",
 
                     labelStyle: const TextStyle(
                       color: Colors.white54,
@@ -160,9 +160,9 @@ class _RegisterMobileState extends State<RegisterMobile> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
+                      MaterialPageRoute(
                           builder: (_) => CompleteRegisterMobile(
-                            email: emailController.text,
+                            login: loginController.text,
                           ),
                         ),
                       );

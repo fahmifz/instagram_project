@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -29,25 +28,28 @@ class _CreateStoryPageState
 
   Future<void> loadGallery() async {
     try {
-      print('=== REQUEST PERMISSION ===');
+      print(
+        '=== REQUEST PERMISSION ===',
+      );
 
-      final storageStatus =
-    await Permission.photos.request();
+      final status =
+          await Permission.photos.request();
 
-print(
-  'PHOTOS PERMISSION = $storageStatus',
-);
+      print(
+        'PHOTOS PERMISSION = $status',
+      );
 
-if (!storageStatus.isGranted) {
+      if (!status.isGranted) {
+        await openAppSettings();
 
-  await openAppSettings();
+        if (!mounted) return;
 
-  setState(() {
-    isLoading = false;
-  });
+        setState(() {
+          isLoading = false;
+        });
 
-  return;
-}
+        return;
+      }
 
       final albums =
           await PhotoManager.getAssetPathList(
@@ -59,7 +61,7 @@ if (!storageStatus.isGranted) {
       );
 
       if (albums.isEmpty) {
-        print('ALBUM KOSONG');
+        if (!mounted) return;
 
         setState(() {
           isLoading = false;
@@ -68,21 +70,70 @@ if (!storageStatus.isGranted) {
         return;
       }
 
-      final recentAlbum = albums.first;
+      AssetPathEntity recentAlbum =
+          albums.first;
 
-      final media =
+      for (final album in albums) {
+        print(
+          'ALBUM = ${album.name}',
+        );
+
+        final count =
+            await album.assetCountAsync;
+
+        print(
+          'TOTAL = $count',
+        );
+
+        if (album.name
+            .toLowerCase()
+            .contains('camera')) {
+          recentAlbum = album;
+          break;
+        }
+      }
+
+      print(
+        'ALBUM DIPILIH = ${recentAlbum.name}',
+      );
+
+      final allMedia =
           await recentAlbum.getAssetListPaged(
         page: 0,
         size: 300,
       );
 
+      List<AssetEntity> media = [];
+
+      for (final item in allMedia) {
+        try {
+          final file =
+              await item.file;
+
+          if (file != null &&
+              await file.exists()) {
+            final size =
+                await file.length();
+
+            if (size > 0) {
+              media.add(item);
+            }
+          }
+        } catch (_) {}
+      }
+
       print(
         'TOTAL FOTO = ${media.length}',
       );
 
-      print(
-        'NAMA ALBUM = ${recentAlbum.name}',
-      );
+      if (media.isNotEmpty) {
+        final firstFile =
+            await media.first.file;
+
+        print(
+          'FILE PERTAMA = ${firstFile?.path}',
+        );
+      }
 
       if (!mounted) return;
 
@@ -103,6 +154,68 @@ if (!storageStatus.isGranted) {
     }
   }
 
+  Widget buildTopMenu() {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Expanded(
+            child: menuCard(
+              Icons.auto_awesome,
+              'Template',
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: menuCard(
+              Icons.music_note,
+              'Musik',
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: menuCard(
+              Icons.grid_view_rounded,
+              'Kolase',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget menuCard(
+    IconData icon,
+    String title,
+  ) {
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        color: const Color(0xff1C1C1E),
+        borderRadius:
+            BorderRadius.circular(14),
+      ),
+      child: Column(
+        mainAxisAlignment:
+            MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: Colors.white,
+          ),
+          const SizedBox(height: 5),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,106 +225,250 @@ if (!storageStatus.isGranted) {
         backgroundColor: Colors.black,
         elevation: 0,
 
-        title: const Text(
-          'Tambahkan Cerita',
-          style: TextStyle(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.close,
             color: Colors.white,
           ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
+
+        title: const Text(
+          'Tambahkan ke cerita',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight:
+                FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
 
-      body: isLoading
-          ? const Center(
-              child:
-                  CircularProgressIndicator(),
-            )
-          : images.isEmpty
-              ? const Center(
-                  child: Text(
-                    'Tidak ada foto ditemukan',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
+      body: Column(
+  children: [
+
+    buildTopMenu(),
+
+    Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+      ),
+      child: Row(
+        mainAxisAlignment:
+            MainAxisAlignment.spaceBetween,
+        children: [
+
+          Row(
+            children: const [
+
+              Text(
+                'Terbaru',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight:
+                      FontWeight.bold,
+                ),
+              ),
+
+              SizedBox(width: 4),
+
+              Icon(
+                Icons.keyboard_arrow_down,
+                color: Colors.white,
+              ),
+            ],
+          ),
+
+          Container(
+            padding:
+                const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+
+            decoration: BoxDecoration(
+              color:
+                  const Color(0xff1C1C1E),
+              borderRadius:
+                  BorderRadius.circular(
+                20,
+              ),
+            ),
+
+            child: Row(
+              children: const [
+
+                Icon(
+                  Icons.check_box_outline_blank,
+                  color: Colors.white,
+                  size: 18,
+                ),
+
+                SizedBox(width: 6),
+
+                Text(
+                  'Pilih',
+                  style: TextStyle(
+                    color: Colors.white,
                   ),
-                )
-              : GridView.builder(
-                  padding:
-                      const EdgeInsets.all(2),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
 
-                  itemCount: images.length,
+    const SizedBox(height: 10),
 
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 2,
-                    mainAxisSpacing: 2,
-                  ),
-
-                  itemBuilder:
-                      (context, index) {
-                    final asset =
-                        images[index];
-
-                    return FutureBuilder<
-                        Uint8List?>(
-                      future:
-                          asset.thumbnailDataWithSize(
-                        const ThumbnailSize(
-                          300,
-                          300,
+    Expanded(
+            child: isLoading
+                ? const Center(
+                    child:
+                        CircularProgressIndicator(),
+                  )
+                : images.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Tidak ada foto ditemukan',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
+                      )
+                    : GridView.builder(
+                        padding:
+                            const EdgeInsets.all(
+                          2,
+                        ),
+                        itemCount:
+                            images.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing:
+                              2,
+                          mainAxisSpacing:
+                              2,
+                        ),
+                        itemBuilder:
+                            (context, index) {
+                          final asset =
+                              images[index];
 
-                      builder:
-                          (context, snapshot) {
-                        if (!snapshot
-                            .hasData) {
-                          return Container(
-                            color: Colors
-                                .grey
-                                .shade900,
-                          );
-                        }
+                          return GestureDetector(
+                            onTap: () async {
+                              final file =
+                                  await asset
+                                      .file;
 
-                        return GestureDetector(
-                          onTap: () async {
-                            final file =
-                                await asset.file;
+                              if (file ==
+                                  null) {
+                                return;
+                              }
 
-                            if (file ==
-                                null) {
-                              return;
-                            }
+                              if (!context
+                                  .mounted) {
+                                return;
+                              }
 
-                            if (!context
-                                .mounted) {
-                              return;
-                            }
-
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    StoryPreviewPage(
-                                  imageFile:
-                                      File(
-                                    file.path,
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      StoryPreviewPage(
+                                    imageFile:
+                                        File(
+                                      file.path,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                            child:
+                                FutureBuilder<
+                                    File?>(
+                              future:
+                                  asset.file,
+                              builder:
+                                  (context,
+                                      snapshot) {
+                                if (snapshot
+                                        .connectionState ==
+                                    ConnectionState
+                                        .waiting) {
+                                  return Container(
+                                    color: Colors
+                                        .grey
+                                        .shade900,
+                                  );
+                                }
 
-                          child:
-                              Image.memory(
-                            snapshot.data!,
-                            fit: BoxFit.cover,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
+                                if (!snapshot
+                                        .hasData ||
+                                    snapshot
+                                            .data ==
+                                        null) {
+                                  return Container(
+                                    color: Colors
+                                        .grey
+                                        .shade900,
+                                    child:
+                                        const Icon(
+                                      Icons
+                                          .image,
+                                      color: Colors
+                                          .white30,
+                                    ),
+                                  );
+                                }
+
+                                return Image.file(
+                                  snapshot
+                                      .data!,
+                                  fit: BoxFit
+                                      .cover,
+                                  errorBuilder:
+                                      (
+                                    context,
+                                    error,
+                                    stackTrace,
+                                  ) {
+                                    return Container(
+                                      color: Colors
+                                          .grey
+                                          .shade900,
+                                      child:
+                                          const Icon(
+                                        Icons
+                                            .broken_image,
+                                        color: Colors
+                                            .white30,
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
     );
   }
 }

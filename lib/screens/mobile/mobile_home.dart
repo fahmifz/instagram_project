@@ -278,15 +278,12 @@ myUserId =
             child: CircleAvatar(
               radius: 32,
 
-              backgroundImage:
-                  NetworkImage(
-                myStory != null
-                    ? StoryService
-                        .getStoryImage(
-                        myStory['image'],
-                      )
-                    : "https://i.pravatar.cc/150?img=1",
-              ),
+              backgroundImage: myStory != null
+    ? NetworkImage(
+        StoryService.getStoryImage(myStory['image']),
+      )
+    : const AssetImage('assets/images/side1.jpeg')
+        as ImageProvider,
             ),
           ),
 
