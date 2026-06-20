@@ -3,12 +3,12 @@ import '../../services/auth_service.dart';
 import '../../screens/web/login_web.dart';
 
 class VerifyOtpWeb extends StatefulWidget {
-  final String email;
+  final String login;
 
-  const VerifyOtpWeb({
-    super.key,
-    required this.email,
-  });
+const VerifyOtpWeb({
+  super.key,
+  required this.login,
+});
 
   @override
   State<VerifyOtpWeb> createState() =>
@@ -37,7 +37,7 @@ class _VerifyOtpWebState
 
     try {
       final result = await AuthService.verifyOtp(
-        email: widget.email,
+        login: widget.login,
         otp: otpController.text.trim(),
       );
 
@@ -131,7 +131,7 @@ class _VerifyOtpWebState
               const SizedBox(height: 15),
 
               Text(
-                widget.email,
+                widget.login,
                 textAlign: TextAlign.center,
               ),
 

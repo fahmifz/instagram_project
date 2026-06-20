@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class AuthService {
 
   static const String baseUrl =
-    "http://10.85.110.110:8000/api/auth";
+    "http://10.147.131.110:8000/api/auth";
 
   static Future<Map<String, dynamic>> login({
   required String login,
@@ -66,9 +66,9 @@ class AuthService {
   }
 
   static Future<Map<String, dynamic>> verifyOtp({
-    required String email,
-    required String otp,
-  }) async {
+      required String login,
+      required String otp,
+    }) async {
 
     final response = await http.post(
       Uri.parse('$baseUrl/verify-otp'),
@@ -78,7 +78,7 @@ class AuthService {
       },
 
       body: jsonEncode({
-        'email': email,
+        'login': login,
         'otp': otp,
       }),
     );

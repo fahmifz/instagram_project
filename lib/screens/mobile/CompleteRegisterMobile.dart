@@ -5,11 +5,11 @@ import '../../services/auth_service.dart';
 import 'mobile_home.dart';
 
 class CompleteRegisterMobile extends StatefulWidget {
-  final String email;
+  final String login;
 
   const CompleteRegisterMobile({
     super.key,
-    required this.email,
+    required this.login,
   });
 
   @override
@@ -226,7 +226,7 @@ class _CompleteRegisterMobileState
                       final result = await AuthService.register(
                         fullname: fullnameController.text,
                         username: usernameController.text,
-                        login: widget.email,
+                        login: widget.login,
                         password: passwordController.text,
                         birthDay: 1,
                         birthMonth: 1,
@@ -238,8 +238,8 @@ class _CompleteRegisterMobileState
                             context,
                             MaterialPageRoute(
                               builder: (_) => VerifyOtpMobile(
-                                email: widget.email,
-                              ),
+                              login: widget.login,
+                            ),
                             ),
                           );
                         } else {

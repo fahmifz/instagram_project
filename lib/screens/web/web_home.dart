@@ -148,7 +148,7 @@ final result =
               const CircleAvatar(
                 radius: 12,
                 backgroundImage: AssetImage(
-                  "assets/images/pesan.png",
+                  "assets/images/side1.jpeg",
                 ),
               ),
 
@@ -273,7 +273,7 @@ final result =
                                                         )
 
                                                       : const AssetImage(
-                                                          "assets/images/profil2.jpeg",
+                                                          "assets/images/side1.jpeg",
                                                         ) as ImageProvider,
                                             ),
                                           ),
